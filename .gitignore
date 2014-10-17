@@ -1,0 +1,11 @@
+lenv/
+__pycache__/
+*.pyc
+*.pyo
+*~
+*.mp4
+*.m4a
+*.3gp
+*.3gpp
+*.webm
+*.flv
