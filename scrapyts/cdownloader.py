@@ -67,7 +67,7 @@ class CLIDownloader:
 
                         try:
                             if add_index == True:
-                                self._download(url, tag=tag, display=display, download=download, prefix='({})'.format(index))
+                                self._download(url, tag=tag, display=display, download=download, prefix='(%05d) '%index)
                             else:
                                 self._download(url, tag=tag, display=display, download=download)
                         except (DownloadError, ParseError) as e:
