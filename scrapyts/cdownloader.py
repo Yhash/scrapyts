@@ -93,6 +93,7 @@ class CLIDownloader:
         return total_download
     
     def _replace_unicode(self, text):
+        if text is None: return text
         return text.encode('ascii', 'xmlcharrefreplace').decode('utf-8')
 
 

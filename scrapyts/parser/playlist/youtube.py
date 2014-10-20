@@ -107,12 +107,9 @@ class YoutubePlaylist:
             # If a video is deleted the owner and timestamp are
             # removed by youtube. While the thumbnail is replace
             # by the default image, http://s.ytimg.com/yts/img/no_thumbnail-vfl4t3-4R.jpg.
+            # It is also true for a video or videos in a playlist that is mark as private.
             #
-            # That is why we can only raise an exception if thumbnail, title or the url is
-            # not present at all.
-            # 
-            # The format of deleted video is something like this.
-            # (vid_thumbnail_url, vid_url, vid_title, None, None)
+            # Tuple Pattern: (vid_index, vid_thumbnail_url, vid_url, vid_title, vid_owner, vid_timestamp)
             
             vid_index = index + 1 + prev_index
 
