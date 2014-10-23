@@ -127,7 +127,7 @@ class CLIDownloader:
                     
                     if media:
                         url = media.get('url')
-                        filename = prefix + utils.create_fname(youtube.title, media.get('type'))
+                        filename = utils.create_fname(prefix + youtube.title, media.get('type'))
                         
                         try:
                             utils.download(filename, url)
