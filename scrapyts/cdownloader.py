@@ -29,9 +29,7 @@ class CLIDownloader:
 
         
     def run(self, url, tag=None, first=None, last=None, display=False, download=True, add_index=False, as_list=False):
-        tp = self._validate_url(url, as_list)
-        url = tp[0]
-        parser = tp[1]        
+        url, parser = self._validate_url(url, as_list)
 
         total_download = 0 # total count of downloaded video or audio.
 
