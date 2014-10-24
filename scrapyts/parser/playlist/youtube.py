@@ -6,6 +6,7 @@ from scrapyts.exceptions import (
 
 import scrapyts.utils as utils
 import json
+import re
 
 
 class YoutubePlaylist:
@@ -25,6 +26,25 @@ class YoutubePlaylist:
             self._soup = BeautifulSoup(html, features="lxml")
             self.title = self._parse_title()
             self.user  = self._parse_user()
+            self.vid_total = self._parse_vid_total()
+
+
+    def _parse_vid_total(self):
+        try:
+            # <ul class="pl-header-details">
+            #     <li></li>
+            #     <li></li>    <-- Total of videos in the playlist. ex: 500 videos
+            #     <li></li>
+            # </ul>
+            vid_total = self._soup.find("ul", class_="pl-header-details").contents[1].string
+        except:
+            pass # Maybe IndexError?
+        else:
+            m = re.match(r'(?P<total>\d+)\s+', vid_total)
+            if m:
+                return int(m.group('total'))
+
+        raise ParseError("Could not find the total of videos in the playlist.")
 
 
     def _parse_title(self):

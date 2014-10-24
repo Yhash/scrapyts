@@ -67,7 +67,10 @@ class CLIDownloader:
 
                         try:
                             if add_index == True:
-                                self._download(url, tag=tag, display=display, download=download, prefix='(%05d) '%index)
+                                tmp = len(str(playlist.vid_total))
+                                prefix = '(%0{}d) '.format(tmp) % index
+                                # self._download(url, tag=tag, display=display, download=download, prefix='(%05d) '%index)
+                                self._download(url, tag=tag, display=display, download=download, prefix=prefix)
                             else:
                                 self._download(url, tag=tag, display=display, download=download)
                         except (DownloadError, ParseError) as e:
