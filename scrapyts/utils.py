@@ -26,6 +26,7 @@ def get_html(url):
         raise
     else:
         if response.status == 200:
+            raw_data = response.data
             content_type = response.headers.get('content-type', None)
 
             if content_type:
@@ -36,32 +37,56 @@ def get_html(url):
                 # subtype        = token
                 # type, subtype and param names are case-insensitive
                 # while param values might or might not be case-sensitive
+                if content_type.startswith("text/html"):
+                    # <meta charset="character_set">
+                    p = re.compile(br'<meta\s+charset=(["\'])(?P<charset>.+?)\1', re.IGNORECASE)
+                    m = p.search(raw_data)
 
+                    if m:
+                        encoding = m.group('charset').strip()
+
+                        try:
+                            html = raw_data.decode(encoding)
+                        except:
+                            pass # If this failed then try the next procedure.
+                        else:
+                            return html
+                    else:
+                        # <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+                        p = re.compile(br'<meta\s+http-equiv=(["\'])Content-Type\1\s+content=(["\'])text/html;\s?charset=(?P<charset>.+?)\2', re.IGNORECASE)
+                        m = p.search(raw_data)
+
+                        if m:
+                            encoding = m.group('charset').strip()
+
+                            try:
+                                html = raw_data.decode(encoding)
+                            except:
+                                pass # If this failed then try the next procedure.
+                            else:
+                                return html
+
+
+                elif content_type.startswith("application/xml"):
+                    pass #TODO: Add support for xml?
+
+
+                # Try to find out the encoding using the content-type.
                 p = re.compile(r'charset=(?P<charset>[^;]+)')
                 m = p.search(content_type)
                 if m:
-                    # This can throw an error if encoding is not available.
                     try:
-                        html = response.data.decode(m.group('charset'))
-                    except: #TODO: Find out what error it will raise
-                        raise
+                        html = raw_data.decode(m.group('charset'))
+                    except:
+                        pass # If this failed then try the next procedure.
                     else:
                         return html
-            
-            b_html = r.data
 
-            # m = re.search(rb'<meta[ \t\n]+charset=(["\'])(?P<charset>.+?)\1', r.content, re.IGNORECASE)
-            p = re.compile(br'<meta[ \t\n]+charset=(["\'])(?P<charset>.+?)\1', re.IGNORECASE)
-            m = p.search(b_html)
-            if m:
-                encoding = m.group('charset').strip()
-                # This can throw an error if encoding is not available.
-                try:
-                    html = b_html.decode(encoding)
-                except: #TODO: Find out what error it will raise
-                    raise
-                else:
-                    return html
+            # If Content-Type not found then try another way.
+            # Maybe I will use chardet module for this task.
+            # For now I will just decode it using utf-8.
+
+            return raw_data.decode('utf-8')
 
     raise DownloadError("Failed to download the page {}".format(url))
 
