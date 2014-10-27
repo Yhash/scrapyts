@@ -209,19 +209,15 @@ class Youtube:
                             size = sizes[i]
                         except KeyError:
                             raise ParseError("Total number of size is not same with the url of the videos - %s." % key)
-                        
                     
-                    tmp_dict = {}   # temporary dict
-                    # It is possible that it will cause an error when youtube update its code.
-                    # TODO: I need to know if int can raise an exception or not? Need to search it first using Google...
-                    tmp_dict['itag'] = itag
-                    tmp_dict['url']  = urls[i]
-                    tmp_dict['type'] = type
-                    tmp_dict['len']  = clen
-                    tmp_dict['size'] = size
-                    
-                    streams.append(tmp_dict)
-                    del tmp_dict
+                    streams.append(
+                    {
+                        'itag': itag,
+                        'url': urls[i],
+                        'type': type,
+                        'len': clen,
+                        'size': size
+                    })
                 
                 #del urls
 
