@@ -51,7 +51,8 @@ class Youtube:
 
 
     def _parse_sig_js(self, jscode):
-        m = re.search(r'signature=(?P<funcname>[$a-zA-Z]+)', jscode)
+        # m = re.search(r'signature=(?P<funcname>[$a-zA-Z]+)', jscode)
+        m = re.search(r'\.sig\|\|(?P<funcname>[a-zA-Z]+)\(.+?\)', jscode)
         if m is None:
             raise ParseError('Could not find the name of the function for decoding the signature.')
 
