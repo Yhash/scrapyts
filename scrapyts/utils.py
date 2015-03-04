@@ -11,8 +11,8 @@ import urllib3
 headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2049.0 Safari/537.36'}
 
 # http://stackoverflow.com/questions/9384474/in-chrome-how-many-redirects-are-too-many
-retry = urllib3.Retry(60, redirect=20)
-timeout = urllib3.Timeout(connect=3.05, read=2*60)
+retry = urllib3.Retry(300, redirect=20)
+timeout = urllib3.Timeout(connect=3.05, read=10)
 http = urllib3.PoolManager(headers=headers,
                            timeout=timeout, 
                            cert_reqs='CERT_REQUIRED', 
@@ -92,7 +92,7 @@ def get_html(url):
 
 
 def get_headers(url, redirect=False):
-    """This function will return the HTTP response headers of a given url or raise an exception if an error occurred.
+    """This function will return the HTTP response headers of a given url or raise an theme-custom if an error occurred.
 
     Arguments:
         url: The url of web page to be downloaded.
@@ -105,7 +105,7 @@ def get_headers(url, redirect=False):
     if redirect == True:
         redirect = 20 # Firefox && Chrome
 
-    retry = urllib3.Retry(60, redirect=redirect)
+    retry = urllib3.Retry(300, redirect=redirect)
 
     try:
         response = http.request('HEAD', url, retries=retry)
@@ -117,24 +117,47 @@ def get_headers(url, redirect=False):
         else:
             response.release_conn()
 
-    raise DownloadError("Failed to download the message headers of {}".format(url))
+    raise DownloadError("Failed to download the message headers of {}. Status code: {}".format(url, response.status))
 
 
 
 #TODO: Add support for Range & If-Range (RFC 2616)
 #TODO: Add support for Content-Encoding. I think urllib3 already have this feature.
-def download(filename, url):
+def download(filename, url, byRange=False, partial_file_size=0, content_length=None):
     try:
-        r = http.request('GET', url, preload_content=False, retries=retry)
+        if byRange == True:
+            if content_length is None:
+                h = {'Range': 'bytes={}-'.format(partial_file_size)}
+            else:
+                h = {'Range': 'bytes={}-{}'.format(partial_file_size, content_length)}
+            r = http.request('GET', url, retries=retry, preload_content=False, headers=h)
+        else:
+            r = http.request('GET', url, retries=retry, preload_content=False)
     except:
         raise # urllib3.exceptions.MaxRetryError or ???
     else:
         content_length = r.headers.get('Content-Length', None)
         blocks = 1024
-
-        if r.status == 200:
+        
+        # Status: OK or Partial Content
+        if r.status == 200 or r.status == 206:
+            # Server does not support partial download
+            if byRange == True and r.status == 200:
+                raise DownloadError("Partial downloading not supported! Status: {}".format(r.status))
+            elif byRange == True and r.status == 206:
+                # Change mode to appending.
+                # Note that the default is 'wb'.
+                # See below...
+                mode = 'ab'
+                
+                # content_length will be inaccurate when using byte range
+                if content_length is not None:
+                    content_length = int(content_length) + partial_file_size
+            else:
+                mode = 'wb' # default mode of 'open'
+                
             if content_length is None:
-                with open(filename, 'wb') as f:
+                with open(filename, mode=mode) as f:
                     while True:
                         try:
                             data = r.read(blocks*2)
@@ -145,29 +168,32 @@ def download(filename, url):
                                 f.write(data)
                             else:
                                 return # download complete
-            else:
+            else:    
                 content_length = int(content_length)
                 timeout = False
                 dl_count = 0
 
                 # is there a better way to do this?
-                with progress.Bar(expected_size=(content_length/blocks)) as bar:
+                with progress.Bar(expected_size=(content_length)) as bar:
 
-                    with open(filename, 'wb') as out:
-                        i = 0
+                    with open(filename, mode=mode) as out:
+                        # Only use the size of partial file when
+                        # using byte range.
+                        if byRange == True:
+                            dl_count = partial_file_size
 
                         while True:
                             try:
                                 data = r.read(blocks)
-                            except urllib3.exceptions.ReadTimeoutError:
+                            except urllib3.exceptions.ReadTimeoutError as e:
                                 timeout = True
                             except:
                                 raise # urllib3.exceptions.ProtocolError or urllib3.exceptions.DecodeError
                             else:
                                 if data:
+                                    # dl_count = int((dl_count + len(data)) / blocks)
                                     dl_count += len(data)
-                                    i += 1
-                                    bar.show(i)
+                                    bar.show(dl_count)
                                     out.write(data)
                                 else:
                                     return # download complete
@@ -175,7 +201,7 @@ def download(filename, url):
                             if timeout == True:
                                 timeout = False
 
-                                h = {'Range': 'bytes={}-{}'.format(dl_count, content_length)}
+                                h = {'Range': 'bytes={}-'.format(dl_count)}
                                 try:
                                     r = http.request('GET', url, retries=retry, preload_content=False, headers=h)
                                 except:
