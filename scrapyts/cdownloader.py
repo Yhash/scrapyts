@@ -4,6 +4,8 @@ from scrapyts.exceptions import DownloadError, ParseError
 
 import sys
 import re
+import os
+import os.path
 import scrapyts.utils as utils
 import scrapyts.helpers.youtube as ythelper
 
@@ -28,7 +30,7 @@ class CLIDownloader:
         return (url, None)
 
         
-    def run(self, url, tag=None, first=None, last=None, display=False, download=True, add_index=False, as_list=False):
+    def run(self, url, tag=None, first=None, last=None, display=False, download=True, add_index=False, as_list=False, resume=False):
         url, parser = self._validate_url(url, as_list)
 
         total_download = 0 # total count of downloaded video or audio.
@@ -68,22 +70,24 @@ class CLIDownloader:
                                 tmp = len(str(playlist.vid_total))
                                 prefix = '(%0{}d) '.format(tmp) % index
                                 # self._download(url, tag=tag, display=display, download=download, prefix='(%05d) '%index)
-                                self._download(url, tag=tag, display=display, download=download, prefix=prefix)
+                                self._download(url, tag=tag, display=display, download=download, prefix=prefix, resume=resume)
                             else:
-                                self._download(url, tag=tag, display=display, download=download)
+                                self._download(url, tag=tag, display=display, download=download, resume=resume)
                         except (DownloadError, ParseError) as e:
                             # You should not raise an error unless
                             # you want CLIDownloader not to download
                             # the next video from the playlist
-                            # raise
-                            print(e, file=sys.stderr)
+                            raise
+
+                            # Maybe I should raise an error???
+                            # print(e, file=sys.stderr)
                         else:
                             total_download += 1 # increment total download
         elif parser == 'video':
             print()
 
             try:
-                self._download(url, tag=tag, display=display, download=download)
+                self._download(url, tag=tag, display=display, download=download, resume=resume)
             except (DownloadError, ParseError) as e:
                 raise
             else:
@@ -98,7 +102,7 @@ class CLIDownloader:
         return text.encode('ascii', 'xmlcharrefreplace').decode('utf-8')
 
 
-    def _download(self, url, tag=None, display=False, download=True, prefix=''):
+    def _download(self, url, tag=None, display=False, download=True, prefix='', resume=False):
         # Silently ignore first and last args.
         try:
             youtube = Youtube(url)
@@ -119,21 +123,66 @@ class CLIDownloader:
                 if download == True:
                     media = None
                     
+                    # If --tag or -t was not used by the user
+                    # the program will download the lowest resolution available.
                     if tag is None:
                         for t in [17, 36, 5, 18, 43, 22]:
                             media = self._get_media(t, media_info)
                             if media: break
                     else:
+                        # This statement will fail when the video with
+                        # the given tag is not available from the server.
                         media = self._get_media(tag, media_info)
                     
+                    # Test if we have something to download.
                     if media:
                         url = media.get('url')
-                        filename = utils.create_fname(prefix + youtube.title, media.get('type'))
+                        # filename = utils.create_fname(prefix + youtube.title, media.get('type'))
                         
-                        try:
-                            utils.download(filename, url)
-                        except Exception as e:
-                            raise DownloadError(e)
+                        # try:
+                        #     utils.download(filename, url)
+                        # except Exception as e:
+                        #     raise DownloadError(e)
+
+                        # Testing...,
+                        if resume == True:
+                            # Try to resume if there's a corrupt file in the disk.
+
+                            filename = utils.create_fname(prefix + youtube.title, media.get('type'))
+                            content_length = media.get('len');
+
+                            # Try to download it by range.
+                            if os.path.exists(filename):
+                                # I don't think this is required however just to
+                                # be sure I will leave it.
+                                if content_length is not None:
+                                    file_size = os.stat(filename).st_size
+                                    if file_size >= int(content_length):
+                                        if file_size > int(content_length):
+                                            msg = "greater than"
+                                        else:
+                                            msg = "equal to"
+                                            
+                                        raise DownloadError("{} already exists and {} the file size of the file to be downloaded.\nExisting File Size: {}\nFile Size on the Server: {}".format(filename, msg, file_size, content_length))
+                                
+                                # Download by range here...
+                                try:
+                                    utils.download(filename, url, byRange=True, partial_file_size=file_size)
+                                except Exception as e:
+                                    raise DownloadError(e)
+                            else:
+                                # Video was not found in the local storage.
+                                try:
+                                    utils.download(filename, url)
+                                except Exception as e:
+                                    raise DownloadError(e)
+                        else: # resume = False
+                            filename = utils.create_fname(prefix + youtube.title, media.get('type'), acopy=True)
+                            # Video was not found in the local storage.
+                            try:
+                                utils.download(filename, url)
+                            except Exception as e:
+                                raise DownloadError(e)
                     else:
                         raise ParseError("Could not found video or audio with itag={}".format(tag))
 

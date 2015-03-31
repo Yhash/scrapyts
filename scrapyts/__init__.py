@@ -5,6 +5,7 @@ def main():
     import argparse
     import sys
     import traceback
+    #import logging
     
     
     # python scrapyts.py url -t 18 --begin 4 --end 150 --step 2 --display --nodownload --index --prefix watch --sufix "by Yhash"
@@ -17,6 +18,7 @@ def main():
     parser.add_argument('-nd', '--nodownload', help='Download the video or audio.', action='store_true')
     parser.add_argument('-i', '--index', help='Prefix filename with the index of the video from the playlist.', action='store_true')
     parser.add_argument('-ap', '--aslist', help='Treat url of a specific video as a url of a playlist.', action='store_true')
+    parser.add_argument('-r', '--resume', help='Resume a partial file.', action='store_true')
     args = parser.parse_args()
     
     try:
@@ -26,7 +28,9 @@ def main():
                                       display=args.display, 
                                       download=not args.nodownload, 
                                       add_index=args.index, 
-                                      as_list=args.aslist)
+                                      as_list=args.aslist,
+                                      resume=args.resume)
     except (DownloadError, ParseError, ValueError) as e:
-        traceback.print_exc()
+        #traceback.print_exc()
+        traceback.print_exception(*sys.exc_info(), file=open('scrapyts.log', 'tw'))
         print(e, file=sys.stderr)

@@ -166,6 +166,7 @@ def download(filename, url, byRange=False, partial_file_size=0, content_length=N
                         else:
                             if data:
                                 f.write(data)
+                                f.flush()
                             else:
                                 return # download complete
             else:    
@@ -254,7 +255,7 @@ def valid_fname(fname):
     return re.sub(r'[\\/:*?"<>|]', '', fname)
 
 
-def create_fname(title, type):
+def create_fname(title, type, acopy=False):
     """Function that create a valid filename.
 
     Arguments:
@@ -283,10 +284,11 @@ def create_fname(title, type):
     
     filename = title + ext
     
-    i = 1
-    while os.path.exists(filename):
-        filename = "%s(%d)%s" % (title, i, ext)
-        i = i + 1
+    if acopy == True:
+        i = 1
+        while os.path.exists(filename):
+            filename = "%s(%d)%s" % (title, i, ext)
+            i = i + 1
     
     return filename
 
