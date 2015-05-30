@@ -36,7 +36,11 @@ class YoutubePlaylist:
             #     <li></li>    <-- Total of videos in the playlist. ex: 500 videos
             #     <li></li>
             # </ul>
-            vid_total = self._soup.find("ul", class_="pl-header-details").contents[1].string
+
+            # Note:
+            # .contents is a collection of elements thats is why you need to test it.
+            # You can used len(...contents) for this. This save my day! Horray!!
+            vid_total = self._soup.find("ul", class_="pl-header-details").contents[3].string
         except:
             pass # Maybe IndexError?
         else:
