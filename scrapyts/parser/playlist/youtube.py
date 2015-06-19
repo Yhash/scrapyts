@@ -7,6 +7,7 @@ from scrapyts.exceptions import (
 import scrapyts.utils as utils
 import json
 import re
+import scrapyts.helpers.youtube as ythelper
 
 
 class YoutubePlaylist:
@@ -17,6 +18,7 @@ class YoutubePlaylist:
         self.url = url
 
         try:
+            url = ythelper.add_hl_to_url(url)
             html = utils.get_html(url)
         except:
             raise DownloadError("Could not download the playlist page {}".format(self.url))
@@ -36,15 +38,15 @@ class YoutubePlaylist:
             #     <li></li>    <-- Total of videos in the playlist. ex: 500 videos
             #     <li></li>
             # </ul>
-
-            # Note:
-            # .contents is a collection of elements thats is why you need to test it.
-            # You can used len(...contents) for this. This save my day! Horray!!
-            vid_total = self._soup.find("ul", class_="pl-header-details").contents[3].string
+            vid_total = "".join(self._soup.find("ul", class_="pl-header-details").strings)
         except:
             pass # Maybe IndexError?
         else:
-            m = re.match(r'(?P<total>\d+)\s+', vid_total)
+            # The syntax of total videos on the page could either be
+            # \d+ video OR \d+ videos depending on whether the playlist
+            # contain only 1 video or more.
+            # So its safe to just used \d+ video. Horray!!!
+            m = re.search(r'(?P<total>\d+)\s+video', vid_total)
             if m:
                 return int(m.group('total'))
 
@@ -72,7 +74,7 @@ class YoutubePlaylist:
     def _parse_vid_thumbnail_url(self, pl_video):
         # This function expect a bs4 object including BeautifulSoup, Tag or NavigableString.
         try:
-            vid_thumbnail_url = pl_video.find(class_="pl-video-thumbnail").find("img").get('src').strip()
+            vid_thumbnail_url = pl_video.find(class_="pl-video-thumbnail").find("img").get('data-thumb').strip()
         except:
             # Whatever exception occured, just raise ParseError.
             raise ParseError("Could not find the thumbnail")

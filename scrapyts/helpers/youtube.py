@@ -35,7 +35,7 @@ def get_video_id(url):
 
 
 def is_playlist_url(url):
-    regexobj = re.compile(r'https?://www\.youtube\.com/playlist\?[_a-zA-Z]\w*=[\w\-]+(&[_a-zA-Z]\w*=[\w\-]+)*')
+    regexobj = re.compile(r'^https?://www\.youtube\.com/playlist\?[_a-zA-Z]\w*=[\w\-]+(&[_a-zA-Z]\w*=[\w\-]+)*$')
     m = regexobj.match(url)
     
     if m:
@@ -46,7 +46,7 @@ def is_playlist_url(url):
 
 
 def is_video_url(url):
-    regexobj = re.compile(r'https?://www\.youtube\.com/watch\?[_a-zA-Z]\w*=[\w\-]+(&[_a-zA-Z]\w*=[\w\-]+)*')
+    regexobj = re.compile(r'^https?://www\.youtube\.com/watch\?[_a-zA-Z]\w*=[\w\-]+(&[_a-zA-Z]\w*=[\w\-]+)*$')
     m = regexobj.match(url)
 
     if m:
@@ -55,3 +55,11 @@ def is_video_url(url):
             return video_id
 
     return False
+
+def add_hl_to_url(url):
+    """ A function that adds or change language query to english in the given url. """
+    # Note: Used it before is_playlist_url() or is_video_url().
+    # Why we need this? For consistency when scraping the information embeded on the page.
+    # Because youtube support different languages for the same page and it makes it hard
+    # to scrap it if we will not force youtube to just send to us a specific page.
+    return re.sub(r'&hl=[^&]+', '', url) + '&hl=en'

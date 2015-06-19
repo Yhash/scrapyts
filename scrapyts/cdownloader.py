@@ -77,10 +77,10 @@ class CLIDownloader:
                             # You should not raise an error unless
                             # you want CLIDownloader not to download
                             # the next video from the playlist
-                            raise
+                            # raise
 
                             # Maybe I should raise an error???
-                            # print(e, file=sys.stderr)
+                            print(e, file=sys.stderr)
                         else:
                             total_download += 1 # increment total download
         elif parser == 'video':

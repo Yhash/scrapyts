@@ -9,6 +9,7 @@ import re
 import json
 import urllib.parse
 import scrapyts.utils as utils
+import scrapyts.helpers.youtube as ythelper
 
 
 class Youtube:
@@ -20,6 +21,7 @@ class Youtube:
         #self._logger = logger # instance of utils.Logger class
 
         try:
+            url = ythelper.add_hl_to_url(url)
             html = utils.get_html(self.url)
         except:
             raise DownloadError("Could not download web page {}".format(url))
