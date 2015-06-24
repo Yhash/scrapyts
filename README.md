@@ -78,17 +78,17 @@ scrapyts is a simple audio/video downloader for the popular video streaming webs
 
     **`python scrapyts.py <playlist_url> -e 2`**
     
-  The latter example works because by default scrapyts will begin downloading from the 1st video. That is why you don't need to used **-b** or **--begin**.
+  The latter example works because by default scrapyts will begin downloading from the 1st video. That is why you don't need to used **`-b`** or **`--begin`**.
   
   * You can also add an auto generated index number in the front of every filename using **`-i`** or **`--index`**.
 
     **`python scrapyts.py <playlist_url> -i`**
     
-  * Lastly, you can resume a partial/broken download using **-r** or **--resume** option.
+  * Lastly, you can resume a partial/broken download using **`-r`** or **`--resume`** option.
     
     **`python scrapyts.py <playlist_url> -r`**
     
-  *Note:* Be careful when using **-r** option because you need to make sure that partial video and the part of the video that you are going to download from youtube are the same. Its easy to mess with this option so be very careful.
+  *Note:* Be careful when using **`-r`** option because you need to make sure that partial video and the part of the video that you are going to download from youtube are the same. Its easy to mess with this option so be very careful.
   
   * If you want to learn more just used the **`--help`** option.
     
@@ -101,5 +101,7 @@ scrapyts is a simple audio/video downloader for the popular video streaming webs
 #License:
   scrapyts is license under MIT. See **LICENSE** file for details.
 
-#Special Thanks To:
+#Thanks To:
   * The creator of youtube-dl because scrapyts uses a modified version of jsinterp.py which is part of youtube-dl.
+  * The creators of lxml, BeautifulSoup4, certifi, urllib3 and clint because without there packages scrapyts wouldn't exists.
+  * Most escpecially to the creators of Python language for creating one of most productive programming language ever written.
