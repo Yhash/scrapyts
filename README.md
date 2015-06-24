@@ -1,4 +1,4 @@
-#README of scrapyt
+#README of scrapyts
 
 ##Description
 
