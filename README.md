@@ -1,12 +1,26 @@
-#This is the README of scrapyt
+#README of scrapyt
 
 ##Description
 
 scrapyts is a simple audio/video downloader for the popular video streaming website youtube.com. It can be used to download only one video or audio or an entire playlist. It also support resuming of partial/broken download.
 
+##Author
+  scrapyts is created by Melvin Esperanzate. A computer enthusiast from the Philippines.
+
+##Installation
+
+  At the moment scrapyts don't have a binary build. So in order to test it you need to download it from source and used Python version 3. And then you need to install some depencies. Below are the list of scrapyts dependecies.
+
+  * lxml
+  * BeautifulSoup 4
+  * certifi
+  * urllib3
+  * clint
+
 ##Terminology:
 
 **`<url>`**          - The url of a video in youtube
+
 **`<playlist_url>`** - The url of a playlist in youtube
 
 ##Usage:
@@ -74,7 +88,7 @@ scrapyts is a simple audio/video downloader for the popular video streaming webs
     
     **`python scrapyts.py <playlist_url> -r`**
     
-  **Note:** Be careful when using **-r** option because you need to make sure that partial video and the part of the video that you are going to download from youtube are the same. It is to mess with this option so be very careful.
+  *Note:* Be careful when using **-r** option because you need to make sure that partial video and the part of the video that you are going to download from youtube are the same. Its easy to mess with this option so be very careful.
   
   * If you want to learn more just used the **`--help`** option.
     
@@ -83,3 +97,9 @@ scrapyts is a simple audio/video downloader for the popular video streaming webs
   or
 
     **`python scrapyts.py -h`**
+
+#License:
+  scrapyts is license under MIT. See **LICENSE** file for details.
+
+#Special Thanks To:
+  * The creator of youtube-dl because scrapyts uses a modified version of jsinterp.py which is part of youtube-dl.
