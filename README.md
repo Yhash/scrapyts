@@ -11,7 +11,7 @@ scrapyts is a simple audio/video downloader for the popular video streaming webs
 
 ##Usage:
   If you want to download a video. Just type:
-    `python scrapyts.py <url>`
+    **`python scrapyts.py <url>`**
   This will download the video in the specified url. Note that by default scrapyts will try to download the lowest available resolution of that video. If you don't like the default behaviour you can used `-t` option to specify your preferred resolution.
     `python scrapyts.py <url> -t 18`
   From the example above scrapyts will download the video from the specified url that have a resolution of 360p when it is available in the server of youtube.
@@ -62,7 +62,7 @@ scrapyts is a simple audio/video downloader for the popular video streaming webs
   Lastly, you can resume a partial/broken download using -r or --resume option.
     `python scrapyts.py <playlist_url> -r`
     
-  *Note:* Be careful when using -r option because you need to make sure that partial video and the part of the
+  **Note:** Be careful when using -r option because you need to make sure that partial video and the part of the
   video that you are going to download from youtube are the same. It is to mess with this option so be very
   careful.
   
