@@ -6,6 +6,7 @@ import sys
 import os.path
 import certifi
 import urllib3
+from scrapyts import config
 
 
 headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/37.0.2049.0 Safari/537.36'}
@@ -13,7 +14,14 @@ headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/5
 # http://stackoverflow.com/questions/9384474/in-chrome-how-many-redirects-are-too-many
 retry = urllib3.Retry(300, redirect=20)
 timeout = urllib3.Timeout(connect=3.05, read=10)
-http = urllib3.PoolManager(headers=headers,
+
+if config.proxy:
+    http = urllib3.ProxyManager(config.proxy, headers=headers,
+                           timeout=timeout, 
+                           cert_reqs='CERT_REQUIRED', 
+                           ca_certs=certifi.where())
+else:
+    http = urllib3.PoolManager(headers=headers,
                            timeout=timeout, 
                            cert_reqs='CERT_REQUIRED', 
                            ca_certs=certifi.where())

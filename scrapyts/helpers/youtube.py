@@ -57,7 +57,7 @@ def is_video_url(url):
     return False
 
 def add_hl_to_url(url):
-    """ A function that adds or change language query to english in the given url. """
+    """ A function that adds or change language query to english for the given url. """
     # Note: Used it before is_playlist_url() or is_video_url().
     # Why we need this? For consistency when scraping the information embeded on the page.
     # Because youtube support different languages for the same page and it makes it hard
